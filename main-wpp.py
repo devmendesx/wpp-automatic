@@ -9,7 +9,11 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime
 from functions import add_contact_to_group
+from functions import read_csv
 import time
+
+
+all_people = read_csv()
 
 chrome_options = Options()
 driver = webdriver.Chrome(options=chrome_options)
@@ -43,8 +47,7 @@ for chat_name in list_chat_groups_test:
         
         #1 Add Contact to Group
         print('Attempting to add to', chat_name, ":")
-        for name in ['Renê']:
-            add_contact_to_group(driver, chat_name, name)
+        add_contact_to_group(driver, chat_name, all_people)
 
 #         #2 Remove Contact from Group
 #         print('Attempting to remove from group ', chat_name, ":")

@@ -9,16 +9,26 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime
 import time
+import csv
+import os
 
+
+def read_csv(): 
+    all_names = []
+    with open('test.csv', 'r') as arquivo:
+        leitor_csv = csv.DictReader(arquivo)
+        for linha in leitor_csv:
+            name = linha['Name']
+            all_names.append(name)
+    return all_names
 
 #define a helper function
 def click_modal_button(driver, button_text):    
-    print("passei aqui")
     modal_button = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[text() = '%s']" % (button_text))))
     modal_button.click()                                                      
 
 #define a function that adds contact_to_add to group_name
-def add_contact_to_group(driver, group_name, contact_to_add):
+def add_contact_to_group(driver, group_name, names):
     #find chat with the correct title
     el_target_chat = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//span[@title='%s']" % (group_name))))
     el_target_chat.click()
@@ -36,31 +46,33 @@ def add_contact_to_group(driver, group_name, contact_to_add):
     el_group_info = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='app']//li//div[@aria-label='Group info']")))
     el_group_info.click()    
     
-    #click on the Add Participant button
-    el_add_participant = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//section//div[string() = 'Add member']")))
-    el_add_participant.click()    
-    
-    #click on the Search
-    el_modal_popup = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
-    el_modal_popup.find_element(By.XPATH, "//div[contains(@title, 'Search input textbox')]").send_keys(contact_to_add)
-    
-    #click on the Contact
-    el_contact_to_add = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//span[@title='%s']" % (contact_to_add))))
-    el_contact_to_add.click()    
-    
-    #check whether already added
-    if len(el_modal_popup.find_elements(By.XPATH, "//div[text() = 'Already added to group']")) > 0:
-        print(contact_to_add + ' was already an existing participant of ' + group_name)
-        el_modal_popup.find_element(By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='x']").click()
-    else:    
-        #click on the Green Check Mark
-        el_green_check = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='checkmark-medium']")))
-        el_green_check.click()        
+    for name in names:
+        contact_to_add = name
+        #click on the Add Participant button
+        el_add_participant = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//section//div[string() = 'Add member']")))
+        el_add_participant.click()    
+        
+        #click on the Search
+        el_modal_popup = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
+        el_modal_popup.find_element(By.XPATH, "//div[contains(@title, 'Search input textbox')]").send_keys(contact_to_add)
+        
+        #click on the Contact
+        el_contact_to_add = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//span[@title='%s']" % (contact_to_add))))
+        el_contact_to_add.click()    
+        
+        #check whether already added
+        if len(el_modal_popup.find_elements(By.XPATH, "//div[text() = 'Already added to group']")) > 0:
+            print(contact_to_add + ' was already an existing participant of ' + group_name)
+            el_modal_popup.find_element(By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='x']").click()
+        else:    
+            #click on the Green Check Mark
+            el_green_check = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='checkmark-medium']")))
+            el_green_check.click()        
 
-        #click on the Add Participant
-        click_modal_button(driver,'Add member')
-        print(contact_to_add + ' added to ' + group_name)
-
+            #click on the Add Participant
+            click_modal_button(driver,'Add member')
+            print(contact_to_add + ' added to ' + group_name)
+        time.sleep(10)
 
 def remove_contact_from_group(driver,group_name, contact_to_remove):
     #find chat with the correct title
