@@ -22,10 +22,20 @@ def read_csv():
             all_names.append(name)
     return all_names
 
+def send_message(driver, name):
+    text_field = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "//div[@id='main']//footer//div[@role='textbox']")))    
+    text_field.send_keys(f"O pai é peri, @{name}")
+
+    time.sleep(5)
+
+    send_message = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//footer//div//span[@data-icon='send']")))
+    send_message.click()     
+    time.sleep(5)
+
 #define a helper function
 def click_modal_button(driver, button_text):    
     modal_button = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[text() = '%s']" % (button_text))))
-    modal_button.click()                                                      
+    modal_button.click()                                            
 
 #define a function that adds contact_to_add to group_name
 def add_contact_to_group(driver, group_name, names):
@@ -45,6 +55,7 @@ def add_contact_to_group(driver, group_name, names):
     #click on the Group Info button
     el_group_info = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='app']//li//div[@aria-label='Group info']")))
     el_group_info.click()    
+
     
     for name in names:
         contact_to_add = name
@@ -54,7 +65,7 @@ def add_contact_to_group(driver, group_name, names):
         
         #click on the Search
         el_modal_popup = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
-        el_modal_popup.find_element(By.XPATH, "//div[contains(@title, 'Search input textbox')]").send_keys(contact_to_add)
+        driver.find_element(By.XPATH, "//div[contains(@title, 'Search input textbox')]").send_keys(contact_to_add)
         
         #click on the Contact
         el_contact_to_add = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//span[@title='%s']" % (contact_to_add))))
@@ -71,6 +82,7 @@ def add_contact_to_group(driver, group_name, names):
 
             #click on the Add Participant
             click_modal_button(driver,'Add member')
+            send_message(driver, name)
             print(contact_to_add + ' added to ' + group_name)
         time.sleep(10)
 

@@ -10,12 +10,14 @@ from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime
 from functions import add_contact_to_group
 from functions import read_csv
+from functions import send_message
 import time
 
 
 all_people = read_csv()
 
 chrome_options = Options()
+chrome_options.add_argument("--start-maximized")
 driver = webdriver.Chrome(options=chrome_options)
 driver.get('https://web.whatsapp.com/')
 
