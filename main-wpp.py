@@ -10,9 +10,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime
 from functions import add_contact_to_group
 from functions import read_csv
-from functions import send_message
-import time
+from functions import sleep
 
+time_after_add = 60
 
 all_people = read_csv()
 
@@ -37,7 +37,7 @@ start_time = datetime.now()
 #loop through a provided list of chat groups to perform an action
 #REPLACE list_chat_groups_test with your chosen list name defined in Part 2
 for chat_name in list_chat_groups_test:
-        
+    sleep(1)
     el_search.clear()
     el_search.send_keys(chat_name)
     
@@ -49,7 +49,7 @@ for chat_name in list_chat_groups_test:
         
         #1 Add Contact to Group
         print('Attempting to add to', chat_name, ":")
-        add_contact_to_group(driver, chat_name, all_people)
+        add_contact_to_group(driver, chat_name, all_people, time_after_add)
 
 #         #2 Remove Contact from Group
 #         print('Attempting to remove from group ', chat_name, ":")

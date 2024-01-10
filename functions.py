@@ -10,8 +10,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime
 import time
 import csv
-import os
-
 
 def read_csv(): 
     all_names = []
@@ -26,11 +24,11 @@ def send_message(driver, name):
     text_field = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "//div[@id='main']//footer//div[@role='textbox']")))    
     text_field.send_keys(f"O pai é peri, @{name}")
 
-    time.sleep(5)
+    sleep(5)
 
     send_message = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//footer//div//span[@data-icon='send']")))
     send_message.click()     
-    time.sleep(5)
+    sleep(5)
 
 #define a helper function
 def click_modal_button(driver, button_text):    
@@ -38,11 +36,11 @@ def click_modal_button(driver, button_text):
     modal_button.click()                                            
 
 #define a function that adds contact_to_add to group_name
-def add_contact_to_group(driver, group_name, names):
+def add_contact_to_group(driver, group_name, names, time_after_add):
     #find chat with the correct title
     el_target_chat = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//span[@title='%s']" % (group_name))))
     el_target_chat.click()
-        
+    sleep(1)
     #wait for it to load by detecting that the header changed with the new title
     # el_header_title = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//header//span[@title='%s']" % (group_name))))
     # print('Passei aqui')
@@ -51,40 +49,45 @@ def add_contact_to_group(driver, group_name, names):
     #click on the menu button
     el_menu_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//header//div//span[@data-icon='menu']")))
     el_menu_button.click()
+    sleep(1)
     
     #click on the Group Info button
     el_group_info = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='app']//li//div[@aria-label='Group info']")))
     el_group_info.click()    
-
+    sleep(1)
     
     for name in names:
         contact_to_add = name
         #click on the Add Participant button
         el_add_participant = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//section//div[string() = 'Add member']")))
         el_add_participant.click()    
-        
-        #click on the Search
-        el_modal_popup = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
-        driver.find_element(By.XPATH, "//div[contains(@title, 'Search input textbox')]").send_keys(contact_to_add)
-        
-        #click on the Contact
-        el_contact_to_add = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//span[@title='%s']" % (contact_to_add))))
-        el_contact_to_add.click()    
-        
-        #check whether already added
-        if len(el_modal_popup.find_elements(By.XPATH, "//div[text() = 'Already added to group']")) > 0:
-            print(contact_to_add + ' was already an existing participant of ' + group_name)
-            el_modal_popup.find_element(By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='x']").click()
-        else:    
-            #click on the Green Check Mark
-            el_green_check = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='checkmark-medium']")))
-            el_green_check.click()        
 
-            #click on the Add Participant
-            click_modal_button(driver,'Add member')
-            send_message(driver, name)
-            print(contact_to_add + ' added to ' + group_name)
-        time.sleep(10)
+        #click on the Search
+        el_modal_popup = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
+        driver.find_element(By.XPATH, "//div[contains(@title, 'Search input textbox')]").send_keys(contact_to_add)
+        sleep(5)
+        
+        user_exist = verify_if_exists(driver, el_modal_popup)
+        if user_exist is True:
+            #click on the Contact
+            el_contact_to_add = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//span[@title='%s']" % (contact_to_add))))
+            el_contact_to_add.click()    
+            
+            #check whether already added
+            if (len(el_modal_popup.find_elements(By.XPATH, "//div[text() = 'Already added to group']")) > 0):
+                print(contact_to_add + ' was already an existing participant of ' + group_name)
+                if((len(el_modal_popup.find_elements(By.XPATH, "//div[text() = 'Already added to group']")) > 0)):
+                    el_modal_popup.find_element(By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='x']").click()
+            else:    
+                #click on the Green Check Mark
+                el_green_check = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='checkmark-medium']")))
+                el_green_check.click()   
+                click_modal_button(driver,'Add member')                
+                if(cancel_invite(driver=driver, el_modal_popup=el_modal_popup) is not True):
+                    #send_message(driver, name)
+                    print(contact_to_add + ' added to ' + group_name)
+            sleep(time_after_add)
+
 
 def remove_contact_from_group(driver,group_name, contact_to_remove):
     #find chat with the correct title
@@ -203,5 +206,29 @@ def dismiss_as_group_admin(driver, group_name, contact_to_remove):
         #click on the Make group admin button
         el_make_group_admin = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='app']//li//div[@aria-label='Dismiss as admin']")))
         el_make_group_admin.click()
-            
         print(contact_to_remove + ' removed as admin of ' + group_name) 
+
+def sleep(seconds):
+    time.sleep(seconds)
+
+def cancel_invite(driver, el_modal_popup): 
+    try:
+        el_modal_popup = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
+        if len(el_modal_popup.find_elements(By.XPATH, "//div[@data-animate-modal-body='true']//div[contains(text(), 'You can invite them privately to join this group.')]")) > 0:
+            print("Contato não pode ser adicionado")
+            click_modal_button(driver, 'Cancel')
+        return True
+    except Exception:
+        return False
+
+def verify_if_exists(driver, el_modal_popup):
+    try:
+        el_modal_popup = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
+        if len(el_modal_popup.find_elements(By.XPATH, "//div[@data-animate-modal-body='true']//div//span[contains(text(), 'No chats, contacts or messages found')]")) > 0:
+            print("Contato não existe.")
+            el_modal_popup.find_element(By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='x']").click()
+            return False
+        else:
+            return True
+    except Exception:
+        return False
