@@ -19,79 +19,76 @@ def read_csv():
     return all_names
 
 def send_message(driver, name):
-    text_field = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.XPATH, "//div[@id='main']//footer//div[@role='textbox']")))    
+    text_field = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "//div[@id='main']//footer//div[@role='textbox']")))    
     text_field.send_keys(f"O pai é peri, @{name}")
-
     sleep(5)
-
-    send_message = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//footer//div//span[@data-icon='send']")))
+    send_message = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//footer//div//span[@data-icon='send']")))
     send_message.click()     
     sleep(5)
 
 #define a helper function
 def click_modal_button(driver, button_text):    
-    modal_button = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[text() = '%s']" % (button_text))))
+    modal_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[text() = '%s']" % (button_text))))
     modal_button.click()                                            
 
 #define a function that adds contact_to_add to group_name
-def add_contact_to_group(driver, group_name, name, time_after_add):
-    #find chat with the correct title
-    el_target_chat = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//span[@title='%s']" % (group_name))))
+def add_contact_to_group(driver, group_name, contact_to_add):
+    # find the target chat
+    sleep(2)
+    el_target_chat = WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.XPATH, "//span[@title='%s']" % (group_name))))
     el_target_chat.click()
-    sleep(1)
-    #wait for it to load by detecting that the header changed with the new title
-    # el_header_title = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//header//span[@title='%s']" % (group_name))))
-    # print('Passei aqui')
-    # print(el_header_title)
-    # el_header_title.click()
-    #click on the menu button
+
+    # click on the menu button
+    sleep(2)
     el_menu_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//header//div//span[@data-icon='menu']")))
     el_menu_button.click()
-    sleep(1)
     
-    #click on the Group Info button
-    el_group_info = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='app']//li//div[@aria-label='Group info']")))
+    #click on the group infoß
+    sleep(2)
+    el_group_info = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='app']//li//div[@aria-label='Group info']")))
     el_group_info.click()    
+
     sleep(1)
-    
-    contact_to_add = name
     #click on the Add Participant button
-    el_add_participant = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//section//div[string() = 'Add member']")))
+    el_add_participant = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//section//div[string() = 'Add member']")))
     el_add_participant.click()    
 
-        #click on the Search
-    el_modal_popup = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
+    #click on the Search
+    sleep(2)
+    el_modal_popup = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
     driver.find_element(By.XPATH, "//div[contains(@title, 'Search input textbox')]").send_keys(contact_to_add)
-    sleep(1)
-        
+    
+    sleep(2)
     user_exist = verify_if_exists(driver, el_modal_popup)
     if user_exist is True:
         #click on the Contact
-        el_contact_to_add = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//span[@title='%s']" % (contact_to_add))))
+        sleep(2)
+        el_contact_to_add = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//span[@title='%s']" % (contact_to_add))))
         el_contact_to_add.click()    
         
+        sleep(2)
         #check whether already added
         if (len(el_modal_popup.find_elements(By.XPATH, "//div[text() = 'Already added to group']")) > 0):
             print(contact_to_add + ' was already an existing participant of ' + group_name)
             if((len(el_modal_popup.find_elements(By.XPATH, "//div[text() = 'Already added to group']")) > 0)):
                 el_modal_popup.find_element(By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='x']").click()
-        else:    
+        else:
+            sleep(2)
             #click on the Green Check Mark
-            el_green_check = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='checkmark-medium']")))
+            el_green_check = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='checkmark-medium']")))
             el_green_check.click()   
-            click_modal_button(driver,'Add member')                
+            click_modal_button(driver,'Add member') 
+            sleep(4)               
             if(cancel_invite(driver=driver, el_modal_popup=el_modal_popup) is not True):
                 #send_message(driver, name)
                 print(contact_to_add + ' added to ' + group_name)
-    sleep(time_after_add)
 
 def sleep(seconds):
     time.sleep(seconds)
 
 def cancel_invite(driver, el_modal_popup): 
     try:
-        sleep(3)
-        el_modal_popup = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
+        el_modal_popup = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
         if len(el_modal_popup.find_elements(By.XPATH, "//div[@data-animate-modal-body='true']//div[contains(text(), 'You can invite them privately to join this group.')]")) > 0:
             print("Contato não pode ser adicionado")
             click_modal_button(driver, 'Cancel')
@@ -101,7 +98,7 @@ def cancel_invite(driver, el_modal_popup):
 
 def verify_if_exists(driver, el_modal_popup):
     try:
-        el_modal_popup = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
+        el_modal_popup = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
         if len(el_modal_popup.find_elements(By.XPATH, "//div[@data-animate-modal-body='true']//div//span[contains(text(), 'No chats, contacts or messages found')]")) > 0:
             print("Contato não existe.")
             el_modal_popup.find_element(By.XPATH, "//div[@data-animate-modal-body='true']//div[@role='button']//span[@data-icon='x']").click()
@@ -130,14 +127,53 @@ def script(chat_name, driver):
     except Exception as exception:
         print("Exception: {}".format(type(exception).__name__))
         print("Exception message: {}".format(exception))
-        
-def main(number_of_people_to_add, time_to_finish, chat_name, start):
+
+def group_is_filled(driver):
+    try:
+        sleep(5)
+        el_group_info = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='app']//li//div[@aria-label='Group info']")))
+        el_group_info.click()    
+        group_capacity = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//section//button[contains(text(),'3')]")))
+        if len(group_capacity) > 0:
+            return True
+    except Exception:
+        return False
+
+def fill_group_with_one_device(chat_name, start):
     try:
         people_added = 0
         start_execution = datetime.now()
         all_names = read_csv()
-        drivers = [Driver(people=get_names(all_names, startNumber=start, finishNumber=number_of_people_to_add * 1), start=start),
-                    Driver(people=get_names(all_names, startNumber=(start+number_of_people_to_add), finishNumber=number_of_people_to_add * 2), start=(start+number_of_people_to_add))]
+        driver = Driver(people=all_names, start=start)
+        execution_status = ExecutionStatus.RUNNING
+        script(chat_name=chat_name, driver=driver.web_driver)
+        sleep(50)                  
+        while is_running(execution_status):
+            start_crew = datetime.now()
+            print('Adicionando usuários ao grupo: ', chat_name)
+            for count in range(len(all_names)):
+                add_contact_to_group(name=driver.people[count], group_name=chat_name, driver=driver.web_driver)
+                people_added +=1
+                count +=1
+                sleep(20)
+            execution_status = ExecutionStatus.FINISHED
+            end_crew = datetime.now()
+            print('Crew finished, duration: {}'.format(end_crew - start_crew))
+            
+        end_execution = datetime.now()
+        print(f"{people_added} people added to group {chat_name}!")
+        print('Execution ended, duration: {}'.format(end_execution - start_execution)) 
+
+    except Exception as exception:
+        raise exception
+    
+def fill_group_with_multiples_device(number_of_people_to_add, chat_name, start):
+    try:
+        people_added = 0
+        start_execution = datetime.now()
+        all_names = read_csv()
+        drivers = [Driver(people=get_names(all_names, startNumber=start, finishNumber=number_of_people_to_add, start=start)),
+                   Driver(people=get_names(all_names, startNumber=start, finishNumber=number_of_people_to_add * 2, start=start))]
         execution_status = ExecutionStatus.RUNNING
         while is_running(execution_status):
             for driver in drivers:
@@ -146,7 +182,7 @@ def main(number_of_people_to_add, time_to_finish, chat_name, start):
                 print('Adicionando usuários ao grupo: ', chat_name)
                 for count in range(len(driver.people)):
                     if count < number_of_people_to_add:
-                        add_contact_to_group(name=driver.people[count], time_after_add=time_to_finish, group_name=chat_name, driver=driver.web_driver)
+                        add_contact_to_group(name=driver.people[count], group_name=chat_name, driver=driver.web_driver)
                         people_added +=1
                         count +=1
                 driver.start += number_of_people_to_add * 2
@@ -156,11 +192,47 @@ def main(number_of_people_to_add, time_to_finish, chat_name, start):
                     driver.people = get_names(all_names, startNumber=driver.start, finishNumber=(driver.start+number_of_people_to_add))
                     end_crew = datetime.now()
                     print('Crew finished, duration: {}'.format(end_crew - start_crew)) 
-            
         end_execution = datetime.now()
         print(f"{people_added} people added to group {chat_name}!")
         print('Execution ended, duration: {}'.format(end_execution - start_execution)) 
+    except Exception as exception:
+        raise exception
 
+def refill_groups(number_of_people_to_add, groups, start):
+    try:
+        people_added = 0
+        start_execution = datetime.now()
+        all_names = read_csv()
+        drivers = []
+        drivers.append(Driver(people=get_names(all_names, startNumber=start, finishNumber=len(all_names)), start=start))
+        # Driver(people=get_names(all_names, startNumber=(start+number_of_people_to_add), finishNumber=number_of_people_to_add * 2), start=(start+number_of_people_to_add))
+        execution_status = ExecutionStatus.RUNNING
+        while is_running(execution_status):
+            for group in groups:
+                print(f'Adicionando no grupo: {group}')
+                for driver in drivers:
+                    start_crew = datetime.now()
+                    script(chat_name=group, driver=driver.web_driver)           
+                    for count in range(len(driver.people)):
+                        if count < number_of_people_to_add:
+                            add_contact_to_group(name=driver.people[count], group_name=group, driver=driver.web_driver)
+                            people_added +=1
+                            count +=1
+                    driver.start += number_of_people_to_add * 2
+                    if(len(driver.people) == 0):
+                        execution_status = ExecutionStatus.FINISHED
+                    # if(group_is_filled(driver=driver)):
+                    #     all_names.append(driver.people[count:])                        
+                    #     print('Group is full duration: {}'.format(end_crew - start_crew)) 
+                    #     continue
+                    else:
+                        driver.people = get_names(all_names, startNumber=driver.start, finishNumber=(driver.start+number_of_people_to_add))
+                        end_crew = datetime.now()
+                        print('Crew finished, duration: {}'.format(end_crew - start_crew)) 
+            
+        end_execution = datetime.now()
+        print(f"{people_added} people added to group {group}!")
+        print('Execution ended, duration: {}'.format(end_execution - start_execution))
     except Exception as exception:
         raise exception
 
@@ -170,3 +242,22 @@ def is_running(status):
 def finish_execution(execution_status): 
     execution_status = ExecutionStatus.FINISHED
     return execution_status 
+
+
+def main(number_of_people_to_add, group_name, start, groups):
+    print("====== FUNCTIONS =====")
+    print("1 - ABASTECER GRUPOS COM UM DISPOSITIVO")
+    print("2 - ABASTECER GRUPOS COM MULTIPLOS DISPOSITIVOS")
+    print("3 - RE-ABASTECER GRUPOS")
+    print("0 - ENVIAR MENSAGENS -- EM CONSTRUÇÃO")
+    decision = input("Digite a opção desejada: ")
+    decisions = [1,2,3]
+
+    if decision == '1':
+        fill_group_with_one_device(group_name, start)
+    if decision == '2':
+        fill_group_with_multiples_device(number_of_people_to_add, groups, start)
+    if decision == '3':
+        refill_groups(number_of_people_to_add, groups, start)
+    if not decisions.__contains__(decision):
+        print('Função não encontrada.')
