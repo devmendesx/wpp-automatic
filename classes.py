@@ -13,9 +13,10 @@ from typing import List
 #     RUNNING = 2
 
 class WABotGroup():
-    def __init__(self, names, ):
-        chrome_options = Options()
+    def __init__(self, names, device_name):
+        chrome_options = webdriver.ChromeOptions();
         chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument(f'--user-data-dir=./Devices/User_Data_{device_name}')
         self.names = names
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get('https://web.whatsapp.com/')
@@ -23,17 +24,13 @@ class WABotGroup():
 
     def find_chat(self, chat_name): 
         try:
-            #wait 60 secs to allow for the user to manually scan the Whatsapp Web QR code to log on
+            self.driver.refresh()
             el_side = WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.ID, "side")))
-
             #locate the search box
             el_search = el_side.find_element(By.XPATH, "//div[contains(@title, 'Search')]")
-            print("Logged in and located search box:", el_search)
-
-            self.functions.sleep(2)
+            self.functions.sleep(1)
             el_search.clear()
             el_search.send_keys(chat_name)
-        
         except Exception as exception:
             print("Exception: {}".format(type(exception).__name__))
             print("Exception message: {}".format(exception))
@@ -132,13 +129,15 @@ class WABotGroup():
 
 class WABotMessage():
 
-    def __init__(self, messages, driver):
-        chrome_options = Options()
+    def __init__(self, messages, device_name):
+        chrome_options = webdriver.ChromeOptions();
         chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument(f'--user-data-dir=./Devices/User_Data_{device_name}')
         self.messages = messages
-        self.driver = webdriver.Chrome(options=chrome_options,)
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get('https://web.whatsapp.com/')
         self.functions = Orchestrator()
+
 
     def find_chat(self, chat_name): 
         try:
@@ -174,15 +173,14 @@ class WABotMessage():
         send_message.click()     
         self.functions.sleep(5)
 
-
 class Orchestrator():
 
     def selectOperation(self):
         print("Which operation would you like use today?")
         print("1 - Start adding people to groups.")
         print("2 - Start sending messages to people.")
-        operation = input("Select option: ")
-        devices_number = input("How many devices: ")
+        operation = int(input("Select option: "))
+        devices_number = int(input("How many devices: "))
 
         if operation == 1:
             self.startAddingGroupContacts(devices_number=devices_number)
@@ -190,25 +188,24 @@ class Orchestrator():
             self.startSendingMessages(devices_number=devices_number)
 
         print("All done or the command you typed does not exist.")
-            
 
     def startAddingGroupContacts(self, devices_number):
         devices: List[WABotGroup] = []
         all_names = self.read_names()
         all_groups = self.read_groups()
         for device in range(devices_number):
-            devices.append(WABotGroup(names=self.store_names(all_contacts=all_names)))
-            self.sleep(5)
+            device_name = input(f"Digite o nome do {device+1} dispositivo: ")
+            devices.append(WABotGroup(names=self.store_names(all_contacts=all_names), device_name=device_name))
+        users_added = len(all_names)
         while True:
-            print(all_names)
             for chat_name in all_groups:
                 for device in devices:
                     device.find_chat(chat_name)
                     for contact in device.names:
                         device.add_contact_to_group(group_name=chat_name, contact_to_add=contact)
+                        users_added -=1
                     device.names = self.restore_names(all_contacts=all_names)
-            if len(all_names) == 0:
-                print(len(all_names))
+            if len(all_names) == 0 and len(all_names) == users_added: 
                 break
 
     def startSendingMessages(self, devices_number):
@@ -216,8 +213,8 @@ class Orchestrator():
         all_names = self.read_names()
         all_messages = self.read_messages()
         for device in range(devices_number):
-            devices.append(WABotMessage(messages=all_messages))
-            self.sleep(5)
+            device_name = input(f"Digite o nome do {device+1} dispositivo: ")
+            devices.append(WABotMessage(messages=all_messages, device_name=device_name))
         while True:
             for name in all_names:
                 for device in devices:
@@ -233,12 +230,12 @@ class Orchestrator():
                     all_contacts.remove(name_to_remove)
 
     def store_names(self, all_contacts):
-        names_to_store = all_contacts[:10]
+        names_to_store = all_contacts[:1]
         self.remove_names(all_contacts=all_contacts, names_to_remove=names_to_store)
         return names_to_store
     
     def restore_names(self, all_contacts):
-        names_to_store = all_contacts[:10]
+        names_to_store = all_contacts[:1]
         self.remove_names(all_contacts=all_contacts, names_to_remove=names_to_store)
         return names_to_store
 
