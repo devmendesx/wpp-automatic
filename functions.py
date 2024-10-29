@@ -147,12 +147,12 @@ def group_is_filled(driver):
     except Exception:
         return False
 
-def fill_group_with_one_device(chat_name, start):
+def fill_group_with_one_device(chat_name, start, sessionName):
     try:
         people_added = 0
         start_execution = datetime.now()
         all_names = read_csv()
-        driver = Driver(people=all_names, start=start)
+        driver = Driver(people=all_names, start=start, session=sessionName)
         execution_status = ExecutionStatus.RUNNING
         script(chat_name=chat_name, driver=driver.web_driver)
         sleep(20)                  
@@ -259,10 +259,11 @@ def main(number_of_people_to_add, group_name, start, groups):
     print("3 - RE-ABASTECER GRUPOS")
     print("0 - ENVIAR MENSAGENS -- EM CONSTRUÇÃO")
     decision = input("Digite a opção desejada: ")
+    sessionDevice = input("Digite o nome do dispositivo(será usado para não precisar logar novamente): ")
     decisions = [1,2,3]
 
     if decision == '1':
-        fill_group_with_one_device(group_name, start)
+        fill_group_with_one_device(group_name, start, sessionDevice)
     if decision == '2':
         fill_group_with_multiples_device(number_of_people_to_add, groups, start)
     if decision == '3':
