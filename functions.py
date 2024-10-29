@@ -158,7 +158,7 @@ def fill_group_with_one_device(chat_name, start):
         sleep(60)                  
         while is_running(execution_status):
             start_crew = datetime.now()
-            print('Adicionando usuários ao grupo: ', chat_name)
+            print('Adicionando usuários ao grupe: ', chat_name)
             for count in range(len(all_names)):
                 add_contact_to_group(driver=driver.web_driver, group_name=chat_name, contact_to_add=all_names[count])
                 people_added +=1
