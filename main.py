@@ -4,7 +4,7 @@ from classes import *
 
 START = 0 
 PLUS_START = 1
-GROUP_NAME = 'Sala nova'
+GROUP_NAME = '01 Lojistas da 44 G1 VIP'
 PEOPLE_TO_ADD = 1
 GROUPS_TO_REFILL = ['Grupe', 'Grupe']
 

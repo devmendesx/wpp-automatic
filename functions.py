@@ -155,15 +155,15 @@ def fill_group_with_one_device(chat_name, start, sessionName):
         driver = Driver(people=all_names, start=start, session=sessionName)
         execution_status = ExecutionStatus.RUNNING
         script(chat_name=chat_name, driver=driver.web_driver)
-        sleep(20)                  
+        sleep(60)                  
         while is_running(execution_status):
             start_crew = datetime.now()
-            print('Adicionando usuários ao grupo: ', chat_name)
+            print('Adicionando usuários ao grupe: ', chat_name)
             for count in range(len(all_names)):
                 add_contact_to_group(driver=driver.web_driver, group_name=chat_name, contact_to_add=all_names[count])
                 people_added +=1
                 count +=1
-                sleep(20)
+                sleep(40)
             execution_status = ExecutionStatus.FINISHED
             end_crew = datetime.now()
             print('Crew finished, duration: {}'.format(end_crew - start_crew))
