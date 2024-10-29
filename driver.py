@@ -12,7 +12,6 @@ class Driver():
         self.web_driver = webdriver.Chrome(options=chrome_options)
         self.web_driver.get('https://web.whatsapp.com/')
 
-
 class ExecutionStatus(Enum):
     FINISHED = 1
     RUNNING = 2

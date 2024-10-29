@@ -1,4 +1,3 @@
-from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,7 +10,7 @@ import csv
 
 def read_csv(): 
     all_names = []
-    with open('test.csv', 'r') as arquivo:
+    with open('names.csv', 'r') as arquivo:
         leitor_csv = csv.DictReader(arquivo)
         for linha in leitor_csv:
             name = linha['Name']
@@ -34,29 +33,38 @@ def click_modal_button(driver, button_text):
 #define a function that adds contact_to_add to group_name
 def add_contact_to_group(driver, group_name, contact_to_add):
     # find the target chat
+    
+    print("passei aqui 1o")
     sleep(2)
     el_target_chat = WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.XPATH, "//span[@title='%s']" % (group_name))))
     el_target_chat.click()
 
+    print("passei aqui 2o")
     # click on the menu button
     sleep(2)
     el_menu_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='main']//header//div//span[@data-icon='menu']")))
     el_menu_button.click()
     
+    print("passei aqui 3o")
+
     #click on the group infoß
     sleep(2)
     el_group_info = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='app']//li//div[@aria-label='Group info']")))
     el_group_info.click()    
 
+    print("passei aqui 4o")
     sleep(1)
     #click on the Add Participant button
     el_add_participant = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//section//div[string() = 'Add member']")))
     el_add_participant.click()    
 
+    print("passei aqui 5o")
     #click on the Search
     sleep(2)
     el_modal_popup = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@data-animate-modal-body='true']")))    
-    driver.find_element(By.XPATH, "//div[contains(@title, 'Search input textbox')]").send_keys(contact_to_add)
+    driver.find_element(By.XPATH, ".//div[@role='textbox']").send_keys(contact_to_add)
+    
+    print("passei aqui 6o")
     
     sleep(2)
     user_exist = verify_if_exists(driver, el_modal_popup)
@@ -117,7 +125,7 @@ def script(chat_name, driver):
         el_side = WebDriverWait(driver, 60).until(EC.element_to_be_clickable((By.ID, "side")))
 
         #locate the search box
-        el_search = el_side.find_element(By.XPATH, "//div[contains(@title, 'Search')]")
+        el_search = el_side.find_element(By.XPATH, ".//div[@role='textbox']")
         print("Logged in and located search box:", el_search)
 
         sleep(1)
@@ -147,12 +155,12 @@ def fill_group_with_one_device(chat_name, start):
         driver = Driver(people=all_names, start=start)
         execution_status = ExecutionStatus.RUNNING
         script(chat_name=chat_name, driver=driver.web_driver)
-        sleep(50)                  
+        sleep(20)                  
         while is_running(execution_status):
             start_crew = datetime.now()
             print('Adicionando usuários ao grupo: ', chat_name)
             for count in range(len(all_names)):
-                add_contact_to_group(name=driver.people[count], group_name=chat_name, driver=driver.web_driver)
+                add_contact_to_group(driver=driver.web_driver, group_name=chat_name, contact_to_add=all_names[count])
                 people_added +=1
                 count +=1
                 sleep(20)
@@ -182,7 +190,7 @@ def fill_group_with_multiples_device(number_of_people_to_add, chat_name, start):
                 print('Adicionando usuários ao grupo: ', chat_name)
                 for count in range(len(driver.people)):
                     if count < number_of_people_to_add:
-                        add_contact_to_group(name=driver.people[count], group_name=chat_name, driver=driver.web_driver)
+                        add_contact_to_group(group_name=chat_name, driver=driver.web_driver)
                         people_added +=1
                         count +=1
                 driver.start += number_of_people_to_add * 2
